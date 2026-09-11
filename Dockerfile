@@ -13,3 +13,8 @@ RUN apt-get update \
     && sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf \
     && a2enmod rewrite \
     && rm -rf /var/lib/apt/lists/*
+
+RUN composer install \
+    --no-dev \
+    --optimize-autoloader \
+    --no-interaction
