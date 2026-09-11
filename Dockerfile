@@ -4,7 +4,10 @@ COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 
+WORKDIR /var/www/html
+
 COPY . /var/www/html
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
 RUN apt-get update \
     && apt-get install -y unzip libzip-dev \
@@ -12,9 +15,13 @@ RUN apt-get update \
     && sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
     && sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf \
     && a2enmod rewrite \
+    && chmod +x /usr/local/bin/docker-entrypoint.sh \
     && rm -rf /var/lib/apt/lists/*
 
 RUN composer install \
     --no-dev \
     --optimize-autoloader \
     --no-interaction
+
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+CMD ["apache2-foreground"]
